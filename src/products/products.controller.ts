@@ -8,8 +8,10 @@ import {
   Body,
   Inject,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 import { PaginationDto } from 'src/common/dto';
 import { PRODUCT_SERVICE } from 'src/config';
@@ -31,8 +33,16 @@ export class ProductsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return `This action returns a #${id} product`;
+  async findOne(@Param('id') id: string) {
+    try {
+      const product = await firstValueFrom(
+        this.productsClient.send({ cmd: 'findOne' }, { id }),
+      );
+
+      return product;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @Delete(':id')
