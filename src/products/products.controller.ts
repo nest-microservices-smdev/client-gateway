@@ -38,13 +38,17 @@ export class ProductsController {
 
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
-    return this.productsClient
-      .send({ cmd: Actions.FindAll }, paginationDto)
-      .pipe(
-        catchError((error) => {
-          throw new RpcException(error);
-        }),
-      );
+    try {
+      return this.productsClient
+        .send({ cmd: Actions.FindAll }, paginationDto)
+        .pipe(
+          catchError((error) => {
+            throw new RpcException(error);
+          }),
+        );
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
   @Get(':id')
