@@ -8,11 +8,11 @@ import {
   Body,
   Inject,
   Query,
-  BadRequestException,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { catchError, firstValueFrom } from 'rxjs';
 
+import { Actions } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto';
 import { PRODUCT_SERVICE } from 'src/config';
 
@@ -29,19 +29,23 @@ export class ProductsController {
 
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
-    return this.productsClient.send({ cmd: 'findAll' }, paginationDto);
+    return this.productsClient
+      .send({ cmd: Actions.FindAll }, paginationDto)
+      .pipe(
+        catchError((error) => {
+          throw new RpcException(error);
+        }),
+      );
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      const product = await firstValueFrom(
-        this.productsClient.send({ cmd: 'findOne' }, { id }),
+      return firstValueFrom(
+        this.productsClient.send({ cmd: Actions.FindOne }, { id }),
       );
-
-      return product;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 
