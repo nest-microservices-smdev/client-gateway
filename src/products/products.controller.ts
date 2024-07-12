@@ -13,13 +13,17 @@ import {
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
 
-import { Actions } from 'src/common/constants';
+import { ENTITY_NAME, getActionName } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto';
 import { PRODUCT_SERVICE } from 'src/config';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-@Controller('products')
+const { PRODUCT, PRODUCTS } = ENTITY_NAME;
+
+const ACTIONS = getActionName(PRODUCT);
+
+@Controller(PRODUCTS)
 export class ProductsController {
   constructor(
     @Inject(PRODUCT_SERVICE) private readonly productsClient: ClientProxy,
@@ -29,7 +33,7 @@ export class ProductsController {
   create(@Body() createProductDto: CreateProductDto) {
     try {
       return firstValueFrom(
-        this.productsClient.send({ cmd: Actions.Create }, createProductDto),
+        this.productsClient.send({ cmd: ACTIONS.create }, createProductDto),
       );
     } catch (error) {
       throw new RpcException(error);
@@ -40,7 +44,7 @@ export class ProductsController {
   findAll(@Query() paginationDto: PaginationDto) {
     try {
       return this.productsClient
-        .send({ cmd: Actions.FindAll }, paginationDto)
+        .send({ cmd: ACTIONS.findAll }, paginationDto)
         .pipe(
           catchError((error) => {
             throw new RpcException(error);
@@ -55,7 +59,7 @@ export class ProductsController {
   findOne(@Param('id', ParseIntPipe) id: number) {
     try {
       return firstValueFrom(
-        this.productsClient.send({ cmd: Actions.FindOne }, { id }),
+        this.productsClient.send({ cmd: ACTIONS.findOne }, { id }),
       );
     } catch (error) {
       throw new RpcException(error);
@@ -66,7 +70,7 @@ export class ProductsController {
   remove(@Param('id', ParseIntPipe) id: number) {
     try {
       return firstValueFrom(
-        this.productsClient.send({ cmd: Actions.Delete }, { id }),
+        this.productsClient.send({ cmd: ACTIONS.delete }, { id }),
       );
     } catch (error) {
       throw new RpcException(error);
@@ -81,7 +85,7 @@ export class ProductsController {
     try {
       return firstValueFrom(
         this.productsClient.send(
-          { cmd: Actions.Update },
+          { cmd: ACTIONS.update },
           { id, ...updateProductDto },
         ),
       );
