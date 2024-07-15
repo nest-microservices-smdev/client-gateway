@@ -7,6 +7,7 @@ import {
   Param,
   Inject,
   ParseIntPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
@@ -43,8 +44,14 @@ export class OrdersController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.ordersClient.send({ cmd: ACTIONS.findOne }, { id });
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      return firstValueFrom(
+        this.ordersClient.send({ cmd: ACTIONS.findOne }, { id }),
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
   @Patch(':id')
