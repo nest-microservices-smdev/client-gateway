@@ -6,17 +6,20 @@ import {
   Patch,
   Param,
   Inject,
-  ParseIntPipe,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { ORDER_SERVICE } from 'src/config';
 import { getActionName } from 'src/common/constants';
 import { firstValueFrom } from 'rxjs';
 import { ENTITY_NAME } from 'src/common/constants';
+import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
+import { PaginationDto } from 'src/common/dto';
+import { StatusDto } from './dto/status.dto';
+import { OrderPaginationDto } from './dto/order-pagination.dto';
 
 const { ORDER, ORDERS } = ENTITY_NAME;
 const ACTIONS = getActionName(ORDER);
@@ -39,11 +42,37 @@ export class OrdersController {
   }
 
   @Get()
-  findAll() {
-    return this.ordersClient.send({ cmd: ACTIONS.findAll }, {});
+  findAll(@Query() orderPaginationDto: OrderPaginationDto) {
+    try {
+      return firstValueFrom(
+        this.ordersClient.send({ cmd: ACTIONS.findAll }, orderPaginationDto),
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
-  @Get(':id')
+  @Get(':status')
+  findByStatus(
+    @Param() statusDto: StatusDto,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    try {
+      return firstValueFrom(
+        this.ordersClient.send(
+          { cmd: ACTIONS.findAll },
+          {
+            status: statusDto.status,
+            ...paginationDto,
+          },
+        ),
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
+  }
+
+  @Get('/id/:id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
       return firstValueFrom(
@@ -56,12 +85,12 @@ export class OrdersController {
 
   @Patch(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateOrderDto: UpdateOrderDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() changeOrderStatusDto: ChangeOrderStatusDto,
   ) {
     return this.ordersClient.send(
       { cmd: ACTIONS.update },
-      { id, ...updateOrderDto },
+      { id, ...changeOrderStatusDto },
     );
   }
 }
