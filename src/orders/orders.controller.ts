@@ -16,7 +16,6 @@ import { ORDER_SERVICE } from 'src/config';
 import { getActionName } from 'src/common/constants';
 import { firstValueFrom } from 'rxjs';
 import { ENTITY_NAME } from 'src/common/constants';
-import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
 import { PaginationDto } from 'src/common/dto';
 import { StatusDto } from './dto/status.dto';
 import { OrderPaginationDto } from './dto/order-pagination.dto';
@@ -84,13 +83,17 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() changeOrderStatusDto: ChangeOrderStatusDto,
-  ) {
-    return this.ordersClient.send(
-      { cmd: ACTIONS.update },
-      { id, ...changeOrderStatusDto },
-    );
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() statusDto: StatusDto) {
+    try {
+      console.log({ cmd: ACTIONS.changeOrderStatus });
+      return firstValueFrom(
+        this.ordersClient.send(
+          { cmd: ACTIONS.changeOrderStatus },
+          { id, status: statusDto.status },
+        ),
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 }
