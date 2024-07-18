@@ -8,6 +8,7 @@ import {
   Inject,
   ParseUUIDPipe,
   Query,
+  Logger,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
@@ -28,6 +29,15 @@ export class OrdersController {
   constructor(
     @Inject(ORDER_SERVICE) private readonly ordersClient: ClientProxy,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.ordersClient.connect();
+      Logger.log('Successfully connected to the microservice');
+    } catch (error) {
+      Logger.error(`Failed to connect to the Orders microservice: ${error}`);
+    }
+  }
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
