@@ -15,7 +15,7 @@ import { catchError, firstValueFrom } from 'rxjs';
 
 import { ENTITY_NAME, getActionName } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto';
-import { PRODUCT_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -25,7 +25,7 @@ const ACTIONS = getActionName(PRODUCT);
 
 @Controller(PRODUCTS)
 export class ProductsController {
-  constructor(@Inject(PRODUCT_SERVICE) private readonly client: ClientProxy) {}
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
   create(@Body() createProductDto: CreateProductDto) {

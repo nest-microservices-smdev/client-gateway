@@ -13,7 +13,7 @@ import {
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 import { CreateOrderDto } from './dto/create-order.dto';
-import { ORDER_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { getActionName } from 'src/common/constants';
 import { firstValueFrom } from 'rxjs';
 import { ENTITY_NAME } from 'src/common/constants';
@@ -27,7 +27,7 @@ const ACTIONS = getActionName(ORDER);
 @Controller(ORDERS)
 export class OrdersController {
   constructor(
-    @Inject(ORDER_SERVICE) private readonly ordersClient: ClientProxy,
+    @Inject(NATS_SERVICE) private readonly ordersClient: ClientProxy,
   ) {}
 
   async onModuleInit() {
