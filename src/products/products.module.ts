@@ -10,10 +10,9 @@ import { PRODUCT_SERVICE, envs } from '../config';
     ClientsModule.register([
       {
         name: PRODUCT_SERVICE,
-        transport: Transport.TCP,
+        transport: Transport.NATS,
         options: {
-          host: envs.productsMicroserviceUrl,
-          port: envs.productsMicroservicePort,
+          servers: envs.natsServers,
         },
       },
     ]),
