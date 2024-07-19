@@ -10,10 +10,9 @@ import { envs, ORDER_SERVICE } from 'src/config';
     ClientsModule.register([
       {
         name: ORDER_SERVICE,
-        transport: Transport.TCP,
+        transport: Transport.NATS,
         options: {
-          host: envs.orderMicroserviceUrl,
-          port: envs.orderMicroservicePort,
+          servers: envs.natsServers,
         },
       },
     ]),
