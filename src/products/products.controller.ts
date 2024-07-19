@@ -25,15 +25,13 @@ const ACTIONS = getActionName(PRODUCT);
 
 @Controller(PRODUCTS)
 export class ProductsController {
-  constructor(
-    @Inject(PRODUCT_SERVICE) private readonly productsClient: ClientProxy,
-  ) {}
+  constructor(@Inject(PRODUCT_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     try {
       return firstValueFrom(
-        this.productsClient.send({ cmd: ACTIONS.create }, createProductDto),
+        this.client.send({ cmd: ACTIONS.create }, createProductDto),
       );
     } catch (error) {
       throw new RpcException(error);
@@ -42,21 +40,17 @@ export class ProductsController {
 
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
-    return this.productsClient
-      .send({ cmd: ACTIONS.findAll }, paginationDto)
-      .pipe(
-        catchError((error) => {
-          throw new RpcException(error);
-        }),
-      );
+    return this.client.send({ cmd: ACTIONS.findAll }, paginationDto).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     try {
-      return firstValueFrom(
-        this.productsClient.send({ cmd: ACTIONS.findOne }, { id }),
-      );
+      return firstValueFrom(this.client.send({ cmd: ACTIONS.findOne }, { id }));
     } catch (error) {
       throw new RpcException(error);
     }
@@ -65,9 +59,7 @@ export class ProductsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     try {
-      return firstValueFrom(
-        this.productsClient.send({ cmd: ACTIONS.delete }, { id }),
-      );
+      return firstValueFrom(this.client.send({ cmd: ACTIONS.delete }, { id }));
     } catch (error) {
       throw new RpcException(error);
     }
@@ -80,10 +72,7 @@ export class ProductsController {
   ) {
     try {
       return firstValueFrom(
-        this.productsClient.send(
-          { cmd: ACTIONS.update },
-          { id, ...updateProductDto },
-        ),
+        this.client.send({ cmd: ACTIONS.update }, { id, ...updateProductDto }),
       );
     } catch (error) {
       throw new RpcException(error);
