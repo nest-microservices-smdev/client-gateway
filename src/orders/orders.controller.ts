@@ -40,7 +40,7 @@ export class OrdersController {
   }
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
+  async create(@Body() createOrderDto: CreateOrderDto) {
     try {
       return firstValueFrom(
         this.ordersClient.send({ cmd: ACTIONS.create }, createOrderDto),
@@ -51,18 +51,20 @@ export class OrdersController {
   }
 
   @Get()
-  findAll(@Query() orderPaginationDto: OrderPaginationDto) {
+  async findAll(@Query() orderPaginationDto: OrderPaginationDto) {
     try {
-      return firstValueFrom(
+      const orders = await firstValueFrom(
         this.ordersClient.send({ cmd: ACTIONS.findAll }, orderPaginationDto),
       );
+
+      return orders;
     } catch (error) {
       throw new RpcException(error);
     }
   }
 
   @Get(':status')
-  findByStatus(
+  async findByStatus(
     @Param() statusDto: StatusDto,
     @Query() paginationDto: PaginationDto,
   ) {
@@ -82,7 +84,7 @@ export class OrdersController {
   }
 
   @Get('/id/:id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
       return firstValueFrom(
         this.ordersClient.send({ cmd: ACTIONS.findOne }, { id }),
@@ -93,9 +95,11 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() statusDto: StatusDto) {
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() statusDto: StatusDto,
+  ) {
     try {
-      console.log({ cmd: ACTIONS.changeOrderStatus });
       return firstValueFrom(
         this.ordersClient.send(
           { cmd: ACTIONS.changeOrderStatus },
