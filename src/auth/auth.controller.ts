@@ -26,6 +26,7 @@ export class AuthController {
         this.authClient.send({ cmd: 'auth.regiter.user' }, createUserDto),
       );
     } catch (error) {
+      console.log('SALIMOS POR ESTE CATCH');
       throw new RpcException(error);
     }
   }
