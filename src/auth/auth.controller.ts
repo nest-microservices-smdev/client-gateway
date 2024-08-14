@@ -1,8 +1,10 @@
-import { Controller, Get, Inject, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Logger, Post } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 import { NATS_SERVICE } from '../config';
-import { firstValueFrom } from 'rxjs';
+import { CreateUserDto } from './dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,10 +20,10 @@ export class AuthController {
   }
 
   @Post('register')
-  async registerUser() {
+  async registerUser(@Body() createUserDto: CreateUserDto) {
     try {
       return firstValueFrom(
-        this.authClient.send({ cmd: 'auth.regiter.user' }, {}),
+        this.authClient.send({ cmd: 'auth.regiter.user' }, createUserDto),
       );
     } catch (error) {
       throw new RpcException(error);
@@ -29,10 +31,10 @@ export class AuthController {
   }
 
   @Post('login')
-  loginUser() {
+  async loginUser(@Body() loginUserDto: LoginUserDto) {
     try {
       return firstValueFrom(
-        this.authClient.send({ cmd: 'auth.login.user' }, {}),
+        this.authClient.send({ cmd: 'auth.login.user' }, loginUserDto),
       );
     } catch (error) {
       throw new RpcException(error);
@@ -40,7 +42,7 @@ export class AuthController {
   }
 
   @Get('verify')
-  verifyUser() {
+  async verifyUser() {
     try {
       return firstValueFrom(
         this.authClient.send({ cmd: 'auth.verify.user' }, {}),
